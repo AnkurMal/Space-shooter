@@ -5,7 +5,6 @@ mod player;
 mod sound;
 use sound::*;
 
-
 ///text_params!(font, size, color)
 macro_rules! text_params {
     ($font: ident, $size: literal, $color: expr) => {
@@ -18,7 +17,6 @@ macro_rules! text_params {
     };
 }
 
-#[derive(Copy, Clone, Debug)]
 struct Projectile {
     x: f32,
     y: f32
@@ -34,14 +32,15 @@ impl Projectile {
 
 #[macroquad::main(window_conf)]
 async fn main() {
-    let audio = init_audio_device();
     let screen_width = screen_width();
     let _screen_height = screen_height();
+
+    let audio = AudioDevice::new();
     let mut player_proj = Vec::new();
 
     set_pc_assets_folder("assets");
 
-    let sound = load_sound("assets/sound/gun.mp3");
+    let sound = Sound::load(&audio, "assets/sound/gun.mp3");
     let font = load_ttf_font("font/edge.ttf").await.unwrap();
     let laser = load_texture("images/png/laserGreen.png").await.unwrap();
     let mut player = Player::new(load_texture("images/png/player.png").await.unwrap(),
@@ -53,7 +52,7 @@ async fn main() {
         player.update(5.);
         if is_key_pressed(KeyCode::Space) {
             player_proj.push(Projectile::new(player.x+player.width()/2., player.y));
-            audio.play(&sound);
+            sound.play();
         }
 
         clear_background(BLACK);

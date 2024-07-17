@@ -1,40 +1,20 @@
-#![allow(unused)]
+#![allow(unused, non_snake_case, non_camel_case_types)]
 use std::ffi::CString;
 use std::os::raw::*;
 
-pub trait Audio {
-    fn play(&self);
-}
-pub struct AudioManager;
-
-impl AudioManager {
-    pub fn play<T: Audio>(&self, audio: &T) {
-        audio.play();
-    }
-}
-
-impl Drop for AudioManager {
-    fn drop(&mut self) {
-        unsafe {
-            CloseAudioDevice();
-        }
-    }
-}
+pub struct AudioDevice;
 
 #[repr(C)]
-#[allow(non_camel_case_types)]
 struct rAudioBuffer {
     _private: [u8; 0]
 }
 
 #[repr(C)]
-#[allow(non_camel_case_types)]
-struct rAudioProcessor{
+struct rAudioProcessor {
     _private: [u8; 0]
 }
 
 #[repr(C)]
-#[allow(non_snake_case)]
 #[derive(Clone)]
 struct AudioStream {
     buffer: *mut rAudioBuffer,
@@ -46,7 +26,6 @@ struct AudioStream {
 }
 
 #[repr(C)]
-#[allow(non_snake_case)]
 #[derive(Clone)]
 pub struct Sound {
     stream: AudioStream,
@@ -54,7 +33,6 @@ pub struct Sound {
 }
 
 #[repr(C)]
-#[allow(non_snake_case)]
 #[derive(Clone)]
 pub struct Music {
     stream: AudioStream,
@@ -65,6 +43,34 @@ pub struct Music {
     ctxData: *mut c_void
 }
 
+impl AudioDevice {
+    pub fn new() -> Self {
+        unsafe {
+            InitAudioDevice();
+        }
+        AudioDevice
+    }
+}
+
+impl Drop for AudioDevice {
+    fn drop(&mut self) {
+        unsafe {
+            CloseAudioDevice();
+        }
+    }
+}
+
+impl Sound {
+    pub fn load(device: &AudioDevice, path: &str) -> Self {
+        let file = CString::new(path).unwrap();
+        unsafe { LoadSound(file.as_ptr()) }
+    }
+
+    pub fn play(&self) {
+        unsafe { PlaySound(self.clone()); }
+    }
+}
+
 impl Drop for Sound {
     fn drop(&mut self) {
         unsafe {
@@ -73,27 +79,16 @@ impl Drop for Sound {
     }
 }
 
-impl Audio for Sound {
-    fn play(&self) {
-        unsafe { PlaySound(self.clone()); }
+impl Music {
+    pub fn load(device: &AudioDevice, path: &str) -> Self {
+        let file = CString::new(path).unwrap();
+        unsafe { LoadMusicStream(file.as_ptr()) }
     }
-}
 
-impl Drop for Music {
-    fn drop(&mut self) {
-        unsafe {
-            UnloadMusicStream(self.clone());
-        }
-    }
-}
-
-impl Audio for Music {
-    fn play(&self) {
+    pub fn play(&self) {
         unsafe { PlayMusicStream(self.clone()); }
     }
-}
 
-impl Music {
     pub fn is_playing(&self) -> bool {
         unsafe {IsMusicStreamPlaying(self.clone())}
     }
@@ -115,15 +110,20 @@ impl Music {
     }
 
     pub fn set_volume(&self, volume: f32) {
-        unsafe {SetMusicVolume(self.clone(), volume);}
+        unsafe {SetMusicVolume(self.clone(), volume as c_float);}
     }
 }
 
-#[allow(non_snake_case)]
-#[link(name="raylib")]
-#[link(name="gdi32")]
-#[link(name="winmm")]
-extern {
+impl Drop for Music {
+    fn drop(&mut self) {
+        unsafe {
+            UnloadMusicStream(self.clone());
+        }
+    }
+}
+
+#[link(name = "audio")]
+extern "C" {
     fn InitAudioDevice();
     fn CloseAudioDevice();
     fn LoadSound(fileName: *const c_char) -> Sound;
@@ -138,23 +138,4 @@ extern {
     fn PauseMusicStream(music: Music);
     fn ResumeMusicStream(music: Music);
     fn SetMusicVolume(music: Music, volume: c_float);
-}
-
-pub fn init_audio_device() -> AudioManager{
-    unsafe { InitAudioDevice(); }
-    AudioManager
-}
-
-pub fn close_audio_device() {
-    unsafe { CloseAudioDevice(); }
-}
-
-pub fn load_sound(path: &str) -> Sound {
-    let file = CString::new(path).unwrap();
-    unsafe { LoadSound(file.as_ptr()) }
-}
-
-pub fn load_music(path: &str) -> Music {
-    let file = CString::new(path).unwrap();
-    unsafe { LoadMusicStream(file.as_ptr()) }
 }
