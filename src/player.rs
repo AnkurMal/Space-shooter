@@ -13,10 +13,10 @@ macro_rules! texture_params {
 }
 
 pub struct Player {
-    texture: Texture2D,
+    pub texture: Texture2D,
     pub x: f32,
     pub y: f32,
-    lives_left: u8,
+    pub lives_left: u8,
     scale: f32
 }
 
