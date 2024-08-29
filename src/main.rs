@@ -1,7 +1,7 @@
 use macroquad::audio::{load_sound, play_sound_once};
 use macroquad::prelude::*;
 use macroquad::rand::gen_range;
-use player::Player;
+use player::*;
 
 mod player;
 
@@ -66,7 +66,7 @@ async fn main() {
             let (mut pi, mut ei) = (0, 0);
 
             player.update(5.);
-            if is_key_pressed(KeyCode::Space) {
+            if is_key_pressed(KeyCode::Space) && hit_dur==0 {
                 player_proj.push(Vec2::new(player.x + player.width() / 2., player.y));
                 play_sound_once(&gun_sound);
             }
@@ -81,7 +81,7 @@ async fn main() {
                 let mut j = 0;
                 let mut hit = false;
 
-                draw_texture_ex(&laser, player_proj[pi].x, player_proj[pi].y, WHITE, texture_params!(laser, LASER_SCALE));
+                draw_texture_ex(&laser, player_proj[pi].x, player_proj[pi].y, WHITE, draw_texture_params(&laser, LASER_SCALE));
                 player_proj[pi].y -= 9.;
 
                 while j < enemies.len() {
@@ -109,7 +109,7 @@ async fn main() {
                 let x = enemy_proj[ei].x;
                 let mut hit = false;
 
-                draw_texture_ex(&laser_en, x, enemy_proj[ei].y, WHITE, texture_params!(laser_en, LASER_SCALE));
+                draw_texture_ex(&laser_en, x, enemy_proj[ei].y, WHITE, draw_texture_params(&laser_en, LASER_SCALE));
                 enemy_proj[ei].y += 5.;
                 let y = enemy_proj[ei].y;
 
@@ -159,7 +159,7 @@ async fn main() {
                     en.x = x;
                     en.y -= gen_range(800., 1000.);
                 }
-                draw_texture_ex(&enemy, en.x, en.y, WHITE, texture_params!(enemy, ENEMY_SCALE));
+                draw_texture_ex(&enemy, en.x, en.y, WHITE, draw_texture_params(&enemy, ENEMY_SCALE));
             });
             draw_text_ex(lives_text.as_str(), 10., 30., text_params!(font, 40, WHITE));
             draw_text_ex(score_text.as_str(), screen_width()-120., 30., text_params!(font, 40, WHITE));

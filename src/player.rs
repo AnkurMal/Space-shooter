@@ -1,17 +1,5 @@
 use macroquad::prelude::*;
 
-///texture_params!(texture, scale)
-#[macro_export]
-macro_rules! texture_params {
-    ($tex: ident, $scale: expr) => {
-        DrawTextureParams {
-            dest_size: Some($tex.size()*$scale),
-            source: Some(Rect::new(0., 0., $tex.width(), $tex.height())),
-            ..Default::default()
-        }
-    };
-}
-
 pub struct Player {
     pub texture: Texture2D,
     pub x: f32,
@@ -61,5 +49,13 @@ impl Player {
             source: Some(src),
             ..Default::default()
         });
+    }
+}
+
+pub fn draw_texture_params(texture: &Texture2D, scale: f32) -> DrawTextureParams {
+    DrawTextureParams {
+        dest_size: Some(texture.size()*scale),
+        source: Some(Rect::new(0., 0., texture.width(), texture.height())),
+        ..Default::default()
     }
 }
