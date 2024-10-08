@@ -38,7 +38,7 @@ async fn main() {
 
     let mut player_proj = Vec::new();
     let mut enemy_proj: Vec<Vec2> = Vec::new();
-    let mut enemies = Vec::new();
+    let mut enemies = Vec::with_capacity(10);
 
     set_pc_assets_folder("assets");
 
@@ -214,8 +214,6 @@ async fn main() {
 
         else if game_state == GameState::Paused {
             let game_paused_dim = measure_text("GAME PAUSED", Some(&font), 100, 1.);
-            let esc_dim = measure_text("Press space to resume", Some(&font), 65, 1.);
-            let exit_dim = measure_text("Press Q to exit", Some(&font), 80, 1.);
 
             clear_background(BLACK);
             draw_text_ex(
@@ -224,22 +222,11 @@ async fn main() {
                 screen_height() * 0.5 - game_paused_dim.height * 2.5,
                 text_params!(font, 100, ORANGE),
             );
-            draw_text_ex(
-                "Press space to resume",
-                (screen_width() - esc_dim.width) * 0.5,
-                screen_height() * 0.5 - esc_dim.height * 0.1,
-                text_params!(font, 65, DARKPURPLE),
-            );
-            draw_text_ex(
-                "Press Q to exit",
-                (screen_width() - exit_dim.width) * 0.5,
-                screen_height() * 0.5 + exit_dim.height * 1.5,
-                text_params!(font, 80, DARKPURPLE),
-            );
-
-            if is_key_pressed(KeyCode::Space) {
+            
+            if root_ui().button(vec2(screen_width()/2.-70., 330.), "Resume") {
                 game_state = GameState::Active;
-            } else if is_key_pressed(KeyCode::Q) {
+            }
+            else if root_ui().button(vec2(screen_width()/2.-45., 400.), "Exit") {
                 break;
             }
         }
