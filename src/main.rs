@@ -6,18 +6,6 @@ use player::*;
 
 mod player;
 
-///text_params!(font, size, color)
-macro_rules! text_params {
-    ($font: ident, $size: literal, $color: expr) => {
-        TextParams {
-            font: Some(&$font),
-            font_size: $size,
-            color: $color,
-            ..Default::default()
-        }
-    };
-}
-
 #[derive(PartialEq)]
 enum GameState {
     Active,
@@ -203,12 +191,12 @@ async fn main() {
                 );
             });
 
-            draw_text_ex(lives_text.as_str(), 10., 30., text_params!(font, 40, WHITE));
+            draw_text_ex(lives_text.as_str(), 10., 30., text_params(&font, 40, WHITE));
             draw_text_ex(
                 score_text.as_str(),
                 screen_width()-score_dim.width-10.,
                 30.,
-                text_params!(font, 40, WHITE),
+                text_params(&font, 40, WHITE),
             );
         }
 
@@ -220,7 +208,7 @@ async fn main() {
                 "GAME PAUSED",
                 (screen_width() - game_paused_dim.width) * 0.5,
                 screen_height() * 0.5 - game_paused_dim.height * 2.5,
-                text_params!(font, 100, ORANGE),
+                text_params(&font, 100, ORANGE),
             );
             
             if root_ui().button(vec2(screen_width()/2.-70., 330.), "Resume") {
@@ -245,13 +233,13 @@ async fn main() {
                 "GAME OVER!",
                 (screen_width() - game_over_dim.width) * 0.5,
                 screen_height() * 0.5 - game_over_dim.height * 4.5,
-                text_params!(font, 100, RED),
+                text_params(&font, 100, RED),
             );
             draw_text_ex(
                 score_text.as_str(),
                 (screen_width() - score_dim.width) * 0.5,
                 screen_height() * 0.5 - score_dim.height * 2.5,
-                text_params!(font, 80, DARKPURPLE),
+                text_params(&font, 80, DARKPURPLE),
             );
 
             if root_ui().button(vec2(screen_width()/2.-50., 330.), "Play") {
@@ -310,5 +298,14 @@ fn reset_enemies(enemies: &mut Vec<Vec2>) {
         let x = gen_range(50., screen_width() - 50.);
         let y = gen_range(index * -150., index * -50.);
         enemies.push(Vec2::new(x, y));
+    }
+}
+
+fn text_params(font: &Font, font_size: u16, color: Color) -> TextParams {
+    TextParams {
+        font: Some(font),
+        font_size,
+        color,
+        ..Default::default()
     }
 }
